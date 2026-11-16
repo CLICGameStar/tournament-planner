@@ -220,8 +220,8 @@ object Planner:
     )
 
   enum Time(hour: Int, day: Int, month: Int, year: Int):
-    case Sat(hour: Int) extends Time(hour, 7, 12, 2024)
-    case Sun(hour: Int) extends Time(hour, 8, 12, 2024)
+    case Sat(hour: Int) extends Time(hour, 5, 12, 2026)
+    case Sun(hour: Int) extends Time(hour, 6, 12, 2026)
 
     val formatter = DateTimeFormatter.ofPattern("EEE HH")
     val dateTime: LocalDateTime = LocalDateTime.of(year, month, day, hour, 0)
@@ -252,63 +252,61 @@ object Planner:
     Slot(startTime, Sat(12)),
     Slot(Sat(18), endTime)
   )
+  val closedSwitchRoom = List(Slot(Sun(1), endTime))
 
   val games = List(
-    Game("Among_Us", 2, noDeepNight),
-    Game("Babyfoot", 3, noNight),
-    Game("Balatro", 1, noNight),
-    Game("Geoguessr", 1, noNight),
-    Game("LoL", 4),
-    Game("LG_One_night", 1, noNight ++ noEarly),
-    Game("MK8dx", 4, noNight),
-    Game("HG_Minecraft", 2, noNight),
-    Game("OSU", 1, noDeepNight),
-    Game("Overcooked2", 1, noNight),
-    Game("Overwatch2", 3, List(Slot(Sun(6), endTime))),
-    Game("Ping-pong", 4, noNight),
-    Game("RL_3v3", 3),
-    Game("Starcraft2", 5),
-    Game("Smash_1v1", 4, noLateAf),
-    Game("Smash_2v2", 4),
+    Game("LoL", 5),
     Game("Valo", 3),
-    Game("Echecs", 2, noNight),
-    Game("TriviaPoly", 1, onlyAfternoon)
+    Game("RL_2v2", 3),
+    Game("CS2", 4),
+    Game("Overwatch2", 3),
+    Game("Minecraft", 2, noNight),
+    Game("Brawlhalla_2v2", 2),
+    Game("GGST", 2),
+    Game("MicroWorks", 1, noNight),
+    Game("Overcooked2", 1, noNight),
+    Game("UCH", 2, closedSwitchRoom),
+    Game("Geoguessr", 1),
+    Game("BAPBAP", 2),
+    Game("Pokemon_Showdown", 2),
+    Game("MK8dx", 4, closedSwitchRoom),
+    Game("Smash_1v1", 4, closedSwitchRoom),
+    Game("Codenames", 3, noNight),
+    Game("Ping-pong", 4),
+    Game("Babyfoot", 3),
+    Game("Trivia", 2, noNight)
   )
 
   val independentSets = Set(
     // Jeux switch
-    Set("MK8dx", "Smash_1v1", "Smash_2v2"),
+    Set("MK8dx", "Smash_1v1"),
     // Jeux hors ligne
-    Set("Echecs", "Ping-pong", "LG_One_night", "Babyfoot"),
-    // Jeux de stratégie TM pour les gens qui aiment mentir
-    Set("Among_Us", "LG_One_night"),
+    Set("Ping-pong", "Babyfoot", "Codenames", "Trivia"),
     // Jeux de zinzins
-    Set("LoL", "Valo"),
-    // TriviaPoly vs jeux chill
-    Set("TriviaPoly", "Balatro"),
-    Set("TriviaPoly", "LG_One_night"),
-    Set("TriviaPoly", "Geoguessr"),
-    Set("TriviaPoly", "Overcooked2")
+    Set("LoL", "Valo", "CS2"),
+    // Fighting games
+    Set("GGST", "Smash_1v1", "Brawlhalla_2v2")
   )
 
   val gameFancyNames = Map(
-    "Among_Us" -> "Among Us",
-    "Babyfoot" -> "Babyfoot",
-    "Balatro" -> "Balatro",
-    "Geoguessr" -> "Geoguessr",
     "LoL" -> "League of Legends",
-    "LG_One_night" -> "Loup-garou pour une nuit",
-    "MK8dx" -> "Mario Kart 8DX (Nintendo Switch)",
-    "HG_Minecraft" -> "Minecraft (Hunger Games)",
-    "OSU" -> "OSU",
-    "Overcooked2" -> "Overcooked 2",
-    "Overwatch2" -> "Overwatch 2",
-    "Ping-pong" -> "Ping-pong",
-    "RL_3v3" -> "Rocket League (3 vs 3)",
-    "Starcraft2" -> "StarCraft 2",
-    "Smash_1v1" -> "Super Smash Bros Ultimate 1 vs 1 (Nintendo Switch)",
-    "Smash_2v2" -> "Super Smash Bros Ultimate 2 vs 2 (Nintendo Switch)",
     "Valo" -> "Valorant",
-    "Echecs" -> "Échecs",
-    "TriviaPoly" -> "TriviaPoly"
+    "RL_2v2" -> "Rocket League (2v2)",
+    "CS2" -> "Counter Strike 2",
+    "Overwatch2" -> "Overwatch",
+    "Minecraft" -> "Minecraft",
+    "Brawlhalla_2v2" -> "Brawlhalla (2v2)",
+    "GGST" -> "Guilty Gear Strive",
+    "MicroWorks" -> "MicroWorks",
+    "Overcooked2" -> "Overcooked 2 (Duo)",
+    "UCH" -> "Ultimate Chicken Horse",
+    "Geoguessr" -> "GeoGuessr",
+    "BAPBAP" -> "BAPBAP",
+    "Pokemon_Showdown" -> "Pokémon Showdown",
+    "MK8dx" -> "Mario Kart 8 Deluxe",
+    "Smash_1v1" -> "Super Smash Bros Ultimate (1v1)",
+    "Codenames" -> "Codenames",
+    "Ping-pong" -> "Ping Pong",
+    "Babyfoot" -> "Babyfoot",
+    "Trivia" -> "Trivia"
   )
