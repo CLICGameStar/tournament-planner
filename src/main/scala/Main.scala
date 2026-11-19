@@ -7,9 +7,19 @@ import java.time.{LocalDate, LocalDateTime}
 import scala.io.Source
 import java.time.Duration
 import scala.util.Random
+import scala.util.CommandLineParser
 
-@main def findSchedule(): Unit =
-  import Planner.*
+ given CommandLineParser.FromString[Option[Int]] with
+  def fromString(value: String): Option[Int] = 
+    try
+      Some(value.toInt)
+    catch
+      case _: NumberFormatException => None
+
+import Planner.*
+@main def main(): Unit =
+
+  val option : Int = 0 //Put 1 to only calculate current conflicts, anything else to optimize
 
   val (gameNames, conflicts) = parseConflictMatrix("src/main/resources/conflict_matrix.csv")
   val updatedConflicts = adjustConflicts(conflicts, independentSets)
@@ -18,6 +28,14 @@ import scala.util.Random
     breaks = breaks,
     independentSets = independentSets
   )
+
+  option match
+    case 1 => 
+      val currentConflicts = totalConflictsFromText(updatedConflicts, games)
+      println("Current schedule conflicts: " + currentConflicts)
+    case _ => findSchedule(gameNames, updatedConflicts, constraints)
+      
+def findSchedule(gameNames: List[String], updatedConflicts: Map[(String, String), Int], constraints: Constraints): Unit =
 
   val schedules =
     (0 until 1000).toList
@@ -38,12 +56,47 @@ import scala.util.Random
       printSchedule(sched, startTime)
     )
   println("Found " + schedules.size + " distinct schedules")
+  
 
   // To test a single schedule :
   // val schedule = iterativeSchedule(games, updatedConflicts, constraints, 100).sorted
   // assert(schedule.size == games.size)
   // println("Optimized schedule conflicts: " + calculateTotalConflicts(schedule, updatedConflicts))
   // printSchedule(schedule, startTime)
+
+
+import Planner.*
+import Time.*
+def totalConflictsFromText(conflictMatrix: ConflictMatrix, games: List[Game]): Int =
+  //Format : "day. XXh : Game_name"
+  val schedule = Source.fromFile("src/main/resources/current_schedule.txt").getLines()
+  val gameSlots = schedule.flatMap { line =>
+    val parts = line.split(" : ").map(_.trim)
+    if parts.length != 2 then
+      println(s"Invalid line format: $line")
+      None
+    else
+      val timePart = parts(0)
+      val gamePart = parts(1)
+      val timeComponents = timePart.split(" ").map(_.trim)
+      if timeComponents.length != 2 then 
+        println(s"Invalid time format in line: $line")
+        None
+      else
+        val dayStr = timeComponents(0)
+        val hourStr = timeComponents(1).replace("h", "")
+        val hour = hourStr.toInt
+        val start = dayStr match
+          case "sam." => Sat(hour)
+          case "dim." => Sun(hour)
+        games.find(_.name == gamePart) match
+          case Some(game) =>
+            Some(ScheduleSlot(startTime.timeTo(start), game))
+          case None => 
+            println(s"Game $gamePart not found in game list.")
+            None
+  }.toList
+  calculateTotalConflicts(gameSlots, conflictMatrix)
 
 object Planner:
   import Time.*
@@ -244,6 +297,7 @@ object Planner:
   val breaks = List(Slot(Sat(12), Sat(13)), Slot(Sat(19), Sat(20)))
 
   val noNight = List(Slot(Sat(23), Sun(8)))
+  val noNight2 = List(Slot(Sun(0), Sun(8)))
   val noDeepNight = List(Slot(Sun(2), endTime))
   val noLateAf = List(Slot(Sun(3), endTime))
   val noMorning = List(Slot(startTime, Sat(12)))
